@@ -53,23 +53,31 @@ class StringAVLTree {
 
 	// PROF: the one and only constructor
 	public StringAVLTree() {
-
+		
 	}
 
 	// PROF: this is here to make it easier for me to write a test
 	// PROF: program – you would never do this in real life!
 	public StringAVLNode getRoot() {
-
+		return root;
 	}
 
 	// PROF: Rotate the node to the right
 	private static StringAVLNode rotateRight(StringAVLNode t) {
-
+		StringAVLNode replacementNode;
+		replacementNode = t.getLeft();
+		t.setLeft(replacementNode.getRight());
+		replacementNode.setRight(t);
+		return replacementNode;
 	}
 
 	// PROF: Rotate the node to the left
 	private static StringAVLNode rotateLeft(StringAVLNode t) {
-
+		StringAVLNode replacementNode;
+		replacementNode = t.getRight();
+		t.setRight(replacementNode.getLeft());
+		replacementNode.setLeft(t);
+		return replacementNode;
 	}
 
 	// PROF: For these next four, be sure not to use any global variables
@@ -77,7 +85,9 @@ class StringAVLTree {
 	// PROF: Return the height of the tree – not to be used anywhere in insert
 	// or delete
 	public int height() {
-
+		int height = 0;
+		
+		return height;
 	}
 
 	// PROF: Return the number of leaves in the tree
@@ -93,7 +103,7 @@ class StringAVLTree {
 	// PROF: Return the inorder successor or null if there is none or num is not
 	// PROF: in the tree
 	public StringAVLNode successor(String str) {
-
+		
 	}
 
 	// Driver Method for insert
@@ -135,18 +145,14 @@ class StringAVLTree {
 				t.setBalance(t.getBalance()-1);
 				if (t.getBalance() == -2) {// PROF: out of balance – must rotate
 					if (t.getLeft().getBalance() == -1){ // PROF: single rotation
-						rotateRight(t);
+						t=rotateRight(t);
 						// PROF: and balance update
 						t.setBalance(0);
-						t.getLeft().setBalance(0);
+						t.getRight().setBalance(0);
 					}
 					else { 				// PROF: double rotation
 						// PROF: and balance update
-						boolean leftRightLeftInsertion;
 						if (t.getLeft().getRight().getBalance() == -1) {
-							leftRightLeftInsertion = true;
-						}
-						if (leftRightLeftInsertion) {
 							t.setBalance(1);
 							t.getLeft().setBalance(0);
 						}
@@ -155,8 +161,7 @@ class StringAVLTree {
 							t.getLeft().setBalance(-1);	
 						}
 						t.getLeft().getRight().setBalance(0);
-						rotateLeft(t);
-						rotateRight(t);
+						t=rotateRight(rotateLeft(t));
 						
 						// PROF: once you get it right here, basically the
 						// PROF: same code can be used in other places,
@@ -165,20 +170,69 @@ class StringAVLTree {
 				}
 			}
 		}
-		
 		else { // PROF: str is bigger than this node
-		
+			   // go Right
+			int oldBalance, newBalance;
+			// PROF: get the old balance of the right child (where the insertion
+			// PROF: is taking place)
+			if (t.getRight() == null) { //THIS IS A SPECIAL CASE
+				oldBalance = 0; //??????????????????????? why can we not set this to 0?
+								//??????????????????????? afaik this won't cause problems?
+				//There are 2 cases where t's right node is null
+				//Case 1: t already has a right child
+				if (t.getBalance() == -1) {
+					//so after the insertion the balance of t will be 0
+					t.setBalance(0);
+				}
+				//Case 2: t is a leaf
+				else {
+					//so after the insertion the balance of t will be 1
+					t.setBalance(1);
+				}
+			}
+			else {
+				oldBalance = t.getRight().getBalance();
+			}
+			t.setRight(insert(str, t.getRight()));
+			newBalance = t.getRight().getBalance();
+			if (oldBalance == 0 && newBalance != 0) { // PROF: did the height increase?
+				// PROF: fix the balance value
+				t.setBalance(t.getBalance()+1);
+				if (t.getBalance() == 2) {// PROF: out of balance – must rotate
+					if (t.getRight().getBalance() == 1){ // PROF: single rotation
+						t=rotateLeft(t);
+						// PROF: and balance update
+						t.setBalance(0);
+						t.getLeft().setBalance(0);
+					}
+					else { 	// PROF: double rotation
+							// PROF: and balance update
+						if (t.getRight().getLeft().getBalance() == 1) {
+							t.setBalance(-1);
+							t.getLeft().setBalance(0);
+						}
+						else {
+							t.setBalance(0);
+							t.getLeft().setBalance(1);	
+						}
+						t.getRight().getLeft().setBalance(0);
+						t=rotateRight(rotateLeft(t));
+						
+						// PROF: once you get it right here, basically the
+						// PROF: same code can be used in other places,
+						// PROF: including delete
+					}					
+				}
+			}
 		}
-	
 	return t;
 	}
 
 	public void delete(String str) {
-
+		root = delete(root, str);
 	}
 
 	private StringAVLNode delete(StringAVLNode t, String str) {
-
 		if (t == null) {
 			//PROF: Do nothing if it is not in the tree
 		}
