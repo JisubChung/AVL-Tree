@@ -85,25 +85,112 @@ class StringAVLTree {
 	// PROF: Return the height of the tree – not to be used anywhere in insert
 	// or delete
 	public int height() {
-		int height = 0;
+		return height(root);
+	}
+	
+	private static int height(StringAVLNode t) {
+		int heightLeft = 0;
+		int heightRight = 0;
+		if (t.getLeft() == null) {
+			heightLeft = 1;
+		}
+		else {
+			heightLeft = height(t.getLeft())+1;
+		}
+		if (t.getRight() == null) {
+			heightRight = 1;
+		}
+		else {
+			heightRight = height(t.getLeft())+1;
+		}
 		
+		int height = 0;
+		if (heightLeft > heightRight) {
+			height = heightLeft;
+		}
+		else {
+			height = heightRight;
+		}
 		return height;
 	}
 
 	// PROF: Return the number of leaves in the tree
 	public int leafCt() {
-
+		return leafCt(root);
+	}
+	
+	private static int leafCt(StringAVLNode t) {
+		int left = 0;
+		int right = 0;
+		int count = 0;
+		if (t.getLeft() == null && t.getRight() == null) { //if t is a leaf
+			count++;
+		}
+		else if (t.getLeft() == null) { //if t has only a right child
+			count+=leafCt(t.getRight());
+		}
+		else if (t.getRight() == null) { //if t has only a left child
+			count+=leafCt(t.getLeft());
+		}
+		else { //if t has both a left and right child
+			count+=leafCt(t.getRight());
+			count+=leafCt(t.getLeft());
+		}
+		return (count);
 	}
 
-	// Return the number of nodes with exactly one non-null child
-	public int stickCt() {
-
-	}
-
-	// PROF: Return the inorder successor or null if there is none or num is not
-	// PROF: in the tree
-	public StringAVLNode successor(String str) {
+	// PROF: Return the number of perfectly balanced AVL nodes
+	public int balanced() {
 		
+	}
+	
+	private static int balanced(StringAVLNode t) {
+		int left = 0;
+		int right = 0;
+		int count = 0;
+		if(t.getLeft() == null) {
+		}
+		else {
+			balanced(t.getLeft());
+		}
+		
+		if(t.getRight() == null) {
+		}
+		else {
+			balanced(t.getRight());
+		}
+		if(t.getBalance() == 0) {
+			count++;
+		}
+		return (count+left+right);
+	}
+
+	// PROF: Return the inorder successor or null if there is none or str is not in the tree
+	public String successor(String str) {
+		boolean keepGoing = true;
+		StringAVLNode holder;
+		holder = root;
+		String successor = null;
+		while(keepGoing) {
+			if (str.compareToIgnoreCase(holder.getVal()) < 0) { //if str is smaller than t's string, go left
+				holder = holder.getLeft();
+			}
+			else if (str.compareToIgnoreCase(holder.getVal()) > 0) { //if str is larger than t's string, go right
+				holder = holder.getRight();
+			}
+			if (str.compareToIgnoreCase(holder.getVal()) == 0) {
+				keepGoing = false;
+			}
+		}
+		if (holder.getRight() == null) {
+		}
+		else {
+			while (holder.getLeft() != null) {
+				holder = holder.getLeft();
+			}
+			successor = holder.getVal();
+		}
+		return successor;
 	}
 
 	// Driver Method for insert
@@ -121,8 +208,7 @@ class StringAVLTree {
 			// PROF: get the old balance of the left child (where the insertion
 			// PROF: is taking place)
 			if (t.getLeft() == null) { //THIS IS A SPECIAL CASE
-				oldBalance = 0; //??????????????????????? why can we not set this to 0?
-								//??????????????????????? afaik this won't cause problems?
+				oldBalance = 0;
 				//There are 2 cases where t's left node is null
 				//Case 1: t already has a right child
 				if (t.getBalance() == 1) {
