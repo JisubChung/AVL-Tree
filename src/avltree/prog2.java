@@ -120,8 +120,6 @@ class StringAVLTree {
 	}
 	
 	private static int leafCt(StringAVLNode t) {
-		int left = 0;
-		int right = 0;
 		int count = 0;
 		if (t.getLeft() == null && t.getRight() == null) { //if t is a leaf
 			count++;
@@ -141,7 +139,7 @@ class StringAVLTree {
 
 	// PROF: Return the number of perfectly balanced AVL nodes
 	public int balanced() {
-		
+		return balanced(root);
 	}
 	
 	private static int balanced(StringAVLNode t) {
