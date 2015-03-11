@@ -430,7 +430,7 @@ class StringAVLTree {
 			
 			OldBalance = //PROF: get the old balance
 					
-			t = replace(t, null, t.getLeft()); 	//PROF: find the replacement node and
+			t = replace(t, null, t.getRight()); 	//PROF: find the replacement node and
 												//PROF: move it up
 			//PROF: get the new balance
 			
@@ -443,21 +443,56 @@ class StringAVLTree {
 	// PROF: The code to find and replace the node being deleted must be recursive
 	// PROF: so that we have easy access to the nodes that might have balance changes
 	private static StringAVLNode replace(StringAVLNode t, StringAVLNode prev, StringAVLNode replacement) {
-		if (replacement.getRight() == null) { // PROF: at the node that will replace the deleted node
+		if (replacement.getLeft() == null) { // PROF: at the node that will replace the deleted node
 			if (prev != null) { // PROF: if replacement node is NOT the child
 								// PROF: ... a special case
+				// PROF: move the replacement node – Recall there is no setVal
+				prev.setLeft(replacement.getRight());
+				replacement.setLeft(t.getLeft());
+				replacement.setRight(t.getRight());
+				replacement.setBalance(t.getBalance());
+				t = replacement;
+				//prev.setBalance(prev.getBalance()+1);
 			}
-			// PROF: move the replacement node – Recall there is no setVal
+			else {
+				replacement.setLeft(t.getLeft());
+				t=replacement;
+			}
 		} 
 		else {
-
+			int oldBalance, newBalance;
 			// PROF: find the old balance
-
-			t = replace(t, replacement, replacement.getRight());
-
+			oldBalance = replacement.getLeft().getBalance();
+			t = replace(t, replacement, replacement.getLeft());
 			// PROF: find the new balance
-
+			if( replacement.getLeft() != null) {
+				newBalance = replacement.getLeft().getBalance(); //check for case of rep.left being moved
+			}
+			else {
+				oldBalance = 1; //for the case when the next one to the left is replaced
+				newBalance = 0; //????
+			}
 			// PROF: update balance and rotate if needed
+			if (oldBalance != 0 && newBalance == 0) { //height change detected
+				replacement.setBalance(replacement.getBalance()+1);
+				if (replacement.getBalance() == 2) { //need to rotate
+					if (replacement.getLeft().getBalance() == 1) { //single case 1
+						replacement=rotateLeft(replacement);
+						replacement.setBalance(0);
+						replacement.getLeft().setBalance(0);
+					}
+					else if (replacement.getLeft().getBalance() == 0) {//single case 2
+						replacement=rotateLeft(replacement);
+						replacement.setBalance(replacement.getBalance()-1);
+						replacement.getLeft().setBalance(1);
+					}
+					else {//double rotate
+						replacement = rotateLeft(rotateRight(replacement));
+						replacement.getLeft().setBalance(0);
+						replacement.getRight().setBalance(0);
+					}
+				}
+			}
 		}
 		return t;
 	}
