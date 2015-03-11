@@ -320,62 +320,113 @@ class StringAVLTree {
 		if (t == null) {
 			//PROF: Do nothing if it is not in the tree
 		}
-		else if (str.compareTo(t.getItem()) == -1) {
+		else if (str.compareToIgnoreCase(t.getVal()) < 0) { //go to the left
+			int oldBalance, newBalance;
 			//PROF: get the old balance.
 			if (t.getLeft() == null) {
 				//PROF: still must deal with this special case in case
 				//PROF: the element to be deleted is not in the tree
+				oldBalance = 999; //??????????????
 			}
 			else {
-				
+				oldBalance = t.getLeft().getBalance();
+				t.setLeft(delete(t.getLeft(), str));				
 			}
-			
-			t.setLeft(delete(t.getLeft(), str));
-			
 			//PROF: get the new balance
 			if (t.getLeft() == null) {
-				
+				oldBalance = -1; //??????????????
+				newBalance = 0;
 			}
 			else {
-				
+				newBalance = t.getLeft().getBalance();
 			}
 			
-			if ... { //PROF: did the height decrease?
-				 
+			if (oldBalance !=  0 && newBalance == 0) { //PROF: did the height decrease?
 				//PROF: correct the balance
-				if { //PROF: need to rotate?
-
+				t.setBalance(t.getBalance()+1);
+				if (t.getBalance() == 2){ //PROF: need to rotate?
 					//PROF: there are now actually 3 cases because t.getRight.getBalance()
 					//PROF: could be -1, 0, or 1.
 					if (t.getRight().getBalance() == 1) {
-					
+						t=rotateLeft(t);
+						t.setBalance(0);
+						t.getLeft().setBalance(0);
 					}
-					else if ... {
-						
+					else if (t.getRight().getBalance() == 0) {
+						t=rotateLeft(t);
+						t.getLeft().setBalance(1);
 					}
 					else { //PROF: double rotation case
-						
+						t=rotateRight(rotateLeft(t));
+						t.getLeft().setBalance(0);
+						t.getRight().setBalance(0);
 					}	
 				}
 			}
 		}
 		
-		else if (d.compareTo(t.getItem()) == 1) {
+		else if (str.compareTo(t.getVal()) > 0)  { //go to the right
+			int oldBalance, newBalance;
+			//PROF: get the old balance.
+			if (t.getRight() == null) {
+				//PROF: still must deal with this special case in case
+				//PROF: the element to be deleted is not in the tree
+				oldBalance = 999; //??????????????
+			}
+			else {
+				oldBalance = t.getRight().getBalance();
+				t.setLeft(delete(t.getRight(), str));				
+			}
+			//PROF: get the new balance
+			if (t.getRight() == null) {
+				oldBalance = 1; //??????????????
+				newBalance = 0;
+			}
+			else {
+				newBalance = t.getRight().getBalance();
+			}
 			
+			if (oldBalance !=  0 && newBalance == 0) { //PROF: did the height decrease?
+				//PROF: correct the balance
+				t.setBalance(t.getBalance()-1);
+				if (t.getBalance() == -2){ //PROF: need to rotate?
+					//PROF: there are now actually 3 cases because t.getRight.getBalance()
+					//PROF: could be -1, 0, or 1.
+					if (t.getLeft().getBalance() == -1) {
+						t=rotateRight(t);
+						t.setBalance(0);
+						t.getRight().setBalance(0);
+					}
+					else if (t.getLeft().getBalance() == 0) {
+						t=rotateRight(t);
+						t.getRight().setBalance(1);
+					}
+					else { //PROF: double rotation case
+						t=rotateLeft(rotateRight(t));
+						t.getRight().setBalance(0);
+						t.getLeft().setBalance(0);
+					}	
+				}
+			}
 		}
 		else { //PROF: t is the node to be deleted
 			
-			if { //PROF: one of the easy cases
-				
+			//case of deleting a leaf
+			if (t.getLeft() == null && t.getRight() == null) { //PROF: one of the easy cases
+				t=null;
 			}
-		
-			else if ... { //PROF: the other easy case
-				
+			//deleting a node with only one child
+			else if ((t.getLeft() == null && t.getRight() != null) || 
+					t.getRight() == null && t.getLeft() != null) { //PROF: the other easy case
+				if (t.getLeft() == null) {
+					t = t.getRight();
+				}
+				else {
+					t = t.getLeft();
+				}
 			}
-			
 			else {
 				
-			}
 			
 			OldBalance = //PROF: get the old balance
 					
@@ -385,32 +436,30 @@ class StringAVLTree {
 			
 			//PROF: just like before, see if height decrease and if so
 			//PROF: check to see if only need to change balance values or rotate
+			}
 		}
 	}
 
-	// PROF: The code to find and replace the node being deleted must be
-	// recursive
-	// PROF: so that we have easy access to the nodes that might have balance
-	// changes
-	private StringAVLNode replace(StringAVLNode t, StringAVLNode prev,
-			StringAVLNode replacement) {
-		if (replacement.getRight() == null) { // PROF: at the node that will
-												// replace
-												// PROF: the deleted node
+	// PROF: The code to find and replace the node being deleted must be recursive
+	// PROF: so that we have easy access to the nodes that might have balance changes
+	private static StringAVLNode replace(StringAVLNode t, StringAVLNode prev, StringAVLNode replacement) {
+		if (replacement.getRight() == null) { // PROF: at the node that will replace the deleted node
 			if (prev != null) { // PROF: if replacement node is NOT the child
 								// PROF: ... a special case
 			}
 			// PROF: move the replacement node – Recall there is no setVal
-		} else {
+		} 
+		else {
 
 			// PROF: find the old balance
 
-			t = replace(t, replacement, replacement.getLeft());
+			t = replace(t, replacement, replacement.getRight());
 
 			// PROF: find the new balance
 
 			// PROF: update balance and rotate if needed
 		}
+		return t;
 	}
 
 	// PROF: who are you? Put your name here!
