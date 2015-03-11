@@ -411,11 +411,11 @@ class StringAVLTree {
 		}
 		else { //PROF: t is the node to be deleted
 			
-			//case of deleting a leaf
+			//deleting a leaf
 			if (t.getLeft() == null && t.getRight() == null) { //PROF: one of the easy cases
 				t=null;
 			}
-			//deleting a node with only one child
+			//deleting a stick
 			else if ((t.getLeft() == null && t.getRight() != null) || 
 					t.getRight() == null && t.getLeft() != null) { //PROF: the other easy case
 				if (t.getLeft() == null) {
@@ -426,18 +426,46 @@ class StringAVLTree {
 				}
 			}
 			else {
-				
-			
-			OldBalance = //PROF: get the old balance
-					
-			t = replace(t, null, t.getRight()); 	//PROF: find the replacement node and
-												//PROF: move it up
-			//PROF: get the new balance
-			
+				int oldBalance, newBalance;
+				//PROF: get the old balance
+				oldBalance = t.getRight().getBalance();
+				t = replace(t, null, t.getRight()); 	//PROF: find the replacement node and
+														//PROF: move it up
+				//PROF: get the new balance
+				newBalance = t.getRight().getBalance();
+				if (oldBalance != 0 && newBalance == 0) {
+					t.setBalance(t.getBalance()-1);
+					if (t.getBalance() == -2) {// PROF: out of balance – must rotate
+						if (t.getLeft().getBalance() == -1){ // PROF: single rotation
+							t=rotateRight(t);
+							// PROF: and balance update
+							t.setBalance(0);
+							t.getRight().setBalance(0);
+						}
+						else { 				// PROF: double rotation
+							// PROF: and balance update
+							if (t.getLeft().getRight().getBalance() == -1) {
+								t.setBalance(1);
+								t.getLeft().setBalance(0);
+							}
+							else {
+								t.setBalance(0);
+								t.getLeft().setBalance(-1);	
+							}
+							t.getLeft().getRight().setBalance(0);
+							t=rotateRight(rotateLeft(t));
+							
+							// PROF: once you get it right here, basically the
+							// PROF: same code can be used in other places,
+							// PROF: including delete
+						}					
+					}
+				}
 			//PROF: just like before, see if height decrease and if so
 			//PROF: check to see if only need to change balance values or rotate
 			}
 		}
+		return t;
 	}
 
 	// PROF: The code to find and replace the node being deleted must be recursive
@@ -476,19 +504,25 @@ class StringAVLTree {
 			if (oldBalance != 0 && newBalance == 0) { //height change detected
 				replacement.setBalance(replacement.getBalance()+1);
 				if (replacement.getBalance() == 2) { //need to rotate
-					if (replacement.getLeft().getBalance() == 1) { //single case 1
+					if (replacement.getRight().getBalance() == 1) { //single case 1
 						replacement=rotateLeft(replacement);
 						replacement.setBalance(0);
 						replacement.getLeft().setBalance(0);
 					}
-					else if (replacement.getLeft().getBalance() == 0) {//single case 2
+					else if (replacement.getRight().getBalance() == 0) {//single case 2
 						replacement=rotateLeft(replacement);
 						replacement.setBalance(replacement.getBalance()-1);
 						replacement.getLeft().setBalance(1);
 					}
 					else {//double rotate
-						replacement = rotateLeft(rotateRight(replacement));
-						replacement.getLeft().setBalance(0);
+						if (replacement.getLeft() != null) {
+							replacement.setBalance(-1);
+						}
+						else {
+							replacement.setBalance(0);
+						}
+						replacement = rotateRight(rotateLeft(replacement));
+						replacement.setBalance(0);
 						replacement.getRight().setBalance(0);
 					}
 				}
