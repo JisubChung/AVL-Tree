@@ -1,10 +1,10 @@
 //Name: Jisub Chung
 //COMP 282 - T/TH
 //Assignment #2
-// DATE THIS WAS TURNED IN
-//Description: Finished contents of Sudoku Solver
+// 3/11/2015
+//Description: String AVL Tree
 
-package avltree;
+
 
 class StringAVLNode {
 
@@ -45,11 +45,12 @@ class StringAVLNode {
 	public void setRight(StringAVLNode pt) {
 		this.right = pt;
 	}
+	
 } // PROF: StringAVLNode
 
 class StringAVLTree {
 
-	private StringAVLNode root;
+	public StringAVLNode root;
 
 	// PROF: the one and only constructor
 	public StringAVLTree() {
@@ -89,27 +90,27 @@ class StringAVLTree {
 	}
 	
 	private static int height(StringAVLNode t) {
-		int heightLeft = 0;
-		int heightRight = 0;
-		if (t.getLeft() == null) {
-			heightLeft = 1;
-		}
-		else {
-			heightLeft = height(t.getLeft())+1;
-		}
-		if (t.getRight() == null) {
-			heightRight = 1;
-		}
-		else {
-			heightRight = height(t.getLeft())+1;
-		}
-		
 		int height = 0;
-		if (heightLeft > heightRight) {
-			height = heightLeft;
+		int left = 0;
+		int right = 0;
+		int greater = 0;
+		if (t==null) {
+			height = 0; 
 		}
 		else {
-			height = heightRight;
+			if (t.getLeft() != null) {
+				left = height(t.getLeft());
+			}
+			if (t.getRight() != null) {
+				right = height(t.getRight());
+			}
+			if (right > left) {
+				greater = right;
+			}
+			else {
+				greater = left;
+			}
+			height = 1 + greater;
 		}
 		return height;
 	}
@@ -121,7 +122,10 @@ class StringAVLTree {
 	
 	private static int leafCt(StringAVLNode t) {
 		int count = 0;
-		if (t.getLeft() == null && t.getRight() == null) { //if t is a leaf
+		if (t == null) {
+			count = 0;
+		}
+		else if (t.getLeft() == null && t.getRight() == null) { //if t is a leaf
 			count++;
 		}
 		else if (t.getLeft() == null) { //if t has only a right child
@@ -143,24 +147,27 @@ class StringAVLTree {
 	}
 	
 	private static int balanced(StringAVLNode t) {
-		int left = 0;
-		int right = 0;
 		int count = 0;
-		if(t.getLeft() == null) {
+		if (t == null) {
+			count = 0;
 		}
 		else {
-			balanced(t.getLeft());
+			if(t.getLeft() == null) {
+			}
+			else {
+				count+=balanced(t.getLeft());
+			}
+			
+			if(t.getRight() == null) {
+			}
+			else {
+				count+=balanced(t.getRight());
+			}
+			if(t.getBalance() == 0) {
+				count++;
+			}	
 		}
-		
-		if(t.getRight() == null) {
-		}
-		else {
-			balanced(t.getRight());
-		}
-		if(t.getBalance() == 0) {
-			count++;
-		}
-		return (count+left+right);
+		return (count);
 	}
 
 	// PROF: Return the inorder successor or null if there is none or str is not in the tree
@@ -206,25 +213,14 @@ class StringAVLTree {
 			// PROF: get the old balance of the left child (where the insertion
 			// PROF: is taking place)
 			if (t.getLeft() == null) { //THIS IS A SPECIAL CASE
-				oldBalance = 0;
-				//There are 2 cases where t's left node is null
-				//Case 1: t already has a right child
-				if (t.getBalance() == 1) {
-					//so after the insertion the balance of t will be 0
-					t.setBalance(0);
-				}
-				//Case 2: t is a leaf
-				else {
-					//so after the insertion the balance of t will be -1
-					t.setBalance(-1);
-				}
+				oldBalance = 99;
 			}
 			else {
 				oldBalance = t.getLeft().getBalance();
 			}
 			t.setLeft(insert(str, t.getLeft()));
 			newBalance = t.getLeft().getBalance();
-			if (oldBalance == 0 && newBalance != 0) { // PROF: did the height increase?
+			if ((oldBalance == 0 && newBalance != 0) || oldBalance == 99) { // PROF: did the height increase?
 				// PROF: fix the balance value
 				t.setBalance(t.getBalance()-1);
 				if (t.getBalance() == -2) {// PROF: out of balance – must rotate
@@ -234,18 +230,23 @@ class StringAVLTree {
 						t.setBalance(0);
 						t.getRight().setBalance(0);
 					}
-					else { 				// PROF: double rotation
+					else {// PROF: double rotation
 						// PROF: and balance update
 						if (t.getLeft().getRight().getBalance() == -1) {
 							t.setBalance(1);
-							t.getLeft().setBalance(0);
+							t.getLeft().setBalance(0); //must
+						}
+						else if (t.getLeft().getRight().getBalance() == 1) {
+							t.setBalance(0);
+							t.getLeft().setBalance(-1); //must, maybe 0 000000000000000000000000000000000000000000
 						}
 						else {
 							t.setBalance(0);
-							t.getLeft().setBalance(-1);	
+							t.getLeft().setBalance(0);
 						}
 						t.getLeft().getRight().setBalance(0);
-						t=rotateRight(rotateLeft(t));
+						t.setLeft(rotateLeft(t.getLeft()));
+						t=rotateRight(t);
 						
 						// PROF: once you get it right here, basically the
 						// PROF: same code can be used in other places,
@@ -260,26 +261,14 @@ class StringAVLTree {
 			// PROF: get the old balance of the right child (where the insertion
 			// PROF: is taking place)
 			if (t.getRight() == null) { //THIS IS A SPECIAL CASE
-				oldBalance = 0; //??????????????????????? why can we not set this to 0?
-								//??????????????????????? afaik this won't cause problems?
-				//There are 2 cases where t's right node is null
-				//Case 1: t already has a right child
-				if (t.getBalance() == -1) {
-					//so after the insertion the balance of t will be 0
-					t.setBalance(0);
-				}
-				//Case 2: t is a leaf
-				else {
-					//so after the insertion the balance of t will be 1
-					t.setBalance(1);
-				}
+				oldBalance = 99; 
 			}
 			else {
 				oldBalance = t.getRight().getBalance();
 			}
 			t.setRight(insert(str, t.getRight()));
 			newBalance = t.getRight().getBalance();
-			if (oldBalance == 0 && newBalance != 0) { // PROF: did the height increase?
+			if ((oldBalance == 0 && newBalance != 0) || oldBalance == 99) { // PROF: did the height increase?
 				// PROF: fix the balance value
 				t.setBalance(t.getBalance()+1);
 				if (t.getBalance() == 2) {// PROF: out of balance – must rotate
@@ -293,15 +282,19 @@ class StringAVLTree {
 							// PROF: and balance update
 						if (t.getRight().getLeft().getBalance() == 1) {
 							t.setBalance(-1);
-							t.getLeft().setBalance(0);
+							t.getRight().setBalance(0);
+						}
+						else if (t.getRight().getLeft().getBalance() == -1) {
+							t.setBalance(0);
+							t.getRight().setBalance(1);	
 						}
 						else {
 							t.setBalance(0);
-							t.getLeft().setBalance(1);	
+							t.getRight().setBalance(0);
 						}
 						t.getRight().getLeft().setBalance(0);
-						t=rotateRight(rotateLeft(t));
-						
+						t.setRight(rotateRight(t.getRight()));
+						t=rotateLeft(t);
 						// PROF: once you get it right here, basically the
 						// PROF: same code can be used in other places,
 						// PROF: including delete
@@ -326,7 +319,7 @@ class StringAVLTree {
 			if (t.getLeft() == null) {
 				//PROF: still must deal with this special case in case
 				//PROF: the element to be deleted is not in the tree
-				oldBalance = 999; //??????????????
+				oldBalance = 999; 
 			}
 			else {
 				oldBalance = t.getLeft().getBalance();
@@ -334,14 +327,14 @@ class StringAVLTree {
 			}
 			//PROF: get the new balance
 			if (t.getLeft() == null) {
-				oldBalance = -1; //??????????????
+				oldBalance = -1;
 				newBalance = 0;
 			}
 			else {
 				newBalance = t.getLeft().getBalance();
 			}
 			
-			if (oldBalance !=  0 && newBalance == 0) { //PROF: did the height decrease?
+			if ((oldBalance !=  0 && newBalance == 0) || oldBalance == 999) { //PROF: did the height decrease?
 				//PROF: correct the balance
 				t.setBalance(t.getBalance()+1);
 				if (t.getBalance() == 2){ //PROF: need to rotate?
@@ -357,7 +350,8 @@ class StringAVLTree {
 						t.getLeft().setBalance(1);
 					}
 					else { //PROF: double rotation case
-						t=rotateRight(rotateLeft(t));
+						t.setRight(rotateRight(t.getRight()));
+						t=rotateLeft(t);
 						t.getLeft().setBalance(0);
 						t.getRight().setBalance(0);
 					}	
@@ -371,22 +365,22 @@ class StringAVLTree {
 			if (t.getRight() == null) {
 				//PROF: still must deal with this special case in case
 				//PROF: the element to be deleted is not in the tree
-				oldBalance = 999; //??????????????
+				oldBalance = 999;
 			}
 			else {
 				oldBalance = t.getRight().getBalance();
-				t.setLeft(delete(t.getRight(), str));				
+				t.setRight(delete(t.getRight(), str));				
 			}
 			//PROF: get the new balance
 			if (t.getRight() == null) {
-				oldBalance = 1; //??????????????
+				oldBalance = 1;
 				newBalance = 0;
 			}
 			else {
 				newBalance = t.getRight().getBalance();
 			}
 			
-			if (oldBalance !=  0 && newBalance == 0) { //PROF: did the height decrease?
+			if ((oldBalance !=  0 && newBalance == 0) || oldBalance == 999) { //PROF: did the height decrease?
 				//PROF: correct the balance
 				t.setBalance(t.getBalance()-1);
 				if (t.getBalance() == -2){ //PROF: need to rotate?
@@ -402,7 +396,8 @@ class StringAVLTree {
 						t.getRight().setBalance(1);
 					}
 					else { //PROF: double rotation case
-						t=rotateLeft(rotateRight(t));
+						t.setLeft(rotateLeft(t.getLeft()));
+						t=rotateRight(t);
 						t.getRight().setBalance(0);
 						t.getLeft().setBalance(0);
 					}	
@@ -410,7 +405,6 @@ class StringAVLTree {
 			}
 		}
 		else { //PROF: t is the node to be deleted
-			
 			//deleting a leaf
 			if (t.getLeft() == null && t.getRight() == null) { //PROF: one of the easy cases
 				t=null;
@@ -431,8 +425,14 @@ class StringAVLTree {
 				oldBalance = t.getRight().getBalance();
 				t = replace(t, null, t.getRight()); 	//PROF: find the replacement node and
 														//PROF: move it up
-				//PROF: get the new balance
-				newBalance = t.getRight().getBalance();
+				//PROF: get the new balance 
+				if (t.getRight() == null) {
+					oldBalance = 1;
+					newBalance = 0;
+				}
+				else {
+					newBalance = t.getRight().getBalance();
+				}
 				if (oldBalance != 0 && newBalance == 0) {
 					t.setBalance(t.getBalance()-1);
 					if (t.getBalance() == -2) {// PROF: out of balance – must rotate
@@ -453,7 +453,8 @@ class StringAVLTree {
 								t.getLeft().setBalance(-1);	
 							}
 							t.getLeft().getRight().setBalance(0);
-							t=rotateRight(rotateLeft(t));
+							t.setRight(rotateRight(t.getRight()));
+							t=rotateLeft(t);
 							
 							// PROF: once you get it right here, basically the
 							// PROF: same code can be used in other places,
@@ -498,7 +499,7 @@ class StringAVLTree {
 			}
 			else {
 				oldBalance = 1; //for the case when the next one to the left is replaced
-				newBalance = 0; //????
+				newBalance = 0;
 			}
 			// PROF: update balance and rotate if needed
 			if (oldBalance != 0 && newBalance == 0) { //height change detected
@@ -521,7 +522,8 @@ class StringAVLTree {
 						else {
 							replacement.setBalance(0);
 						}
-						replacement = rotateRight(rotateLeft(replacement));
+						replacement.setRight(rotateRight(replacement.getRight()));
+						replacement=rotateLeft(replacement);
 						replacement.setBalance(0);
 						replacement.getRight().setBalance(0);
 					}
